@@ -1,0 +1,40 @@
+name: Run R Script to Read Google Sheet
+
+on:
+  push:
+    branches:
+      - main  # 触发工作流的分支
+  workflow_dispatch:  # 允许手动触发工作流
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    environment: Lifisher_Sheet_Secrets  # 指定环境名称
+    env:
+      TZ: Asia/Shanghai  # 设置时区为北京时间 (UTC+8)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3  # 检出代码
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2  # 设置 R 环境
+
+      - name: Cache R packages
+        id: cache-r-packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.R/library  # R 依赖包的默认安装路径
+          key: r-packages-${{ hashFiles('**/DESCRIPTION') }}  # 根据 DESCRIPTION 文件生成缓存键
+          restore-keys: |
+            r-packages-
+
+      - name: Install R dependencies
+        run: |
+          Rscript -e 'install.packages(c("googlesheets4", "jsonlite"), repos="https://cloud.r-project.org")'
+
+      - name: Run R script
+        env:
+          SHEET_KEY: ${{ secrets.SHEET_KEY }}  # 从 GitHub Secrets 中读取 JSON 密钥
+          SHEET_ID: ${{ secrets.SHEET_ID }}    # 从 GitHub Secrets 中读取 Google Sheet ID
+        run: Rscript read-google-sheet.R  # 运行 R 脚本
