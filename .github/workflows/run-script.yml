@@ -1,39 +1,27 @@
-name: Read Google Sheet
+name: run update
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:  # 允许手动触发
 
 jobs:
-  read_sheet:
+  update-sheet:
     runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      contents: write
+    environment: Lifisher_Sheet_Secrets  # 指定环境
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: '4.2.0'
 
-      - name: Install R packages
+      - name: Install dependencies
         run: |
-          install.packages(c("googledrive", "googlesheets4"))
+          R -e 'install.packages("googlesheets4")'
 
-      - name: Read Google Sheet
+      - name: Update Google Sheet
         env:
-          SHEET_KEY: ${{ secrets.SHEET_KEY }}
+          SHEET_KEY: ${{ secrets.SHEET_KEY }}  # 从 Secrets 中获取 JSON 密钥
+          SHEET_ID: ${{ secrets.SHEET_ID }}    # 从 Secrets 中获取 Sheet ID
         run: |
-          echo "$SHEET_KEY" > service-account.json
           Rscript read-google-sheet.R
-
-      - name: Upload result
-        uses: actions/upload-artifact@v3
-        with:
-          name: sheet-data
-          path: output.csv
