@@ -220,3 +220,5 @@ orderSocial <- SocialInquiry[order(SocialInquiry$V1), ]
 # 重命名标题栏
 colnames(orderWeb) <- c('询盘时间', '国家', '公司名称', '联系人', '联系方式', '邮箱', '询盘内容', '跟进人')
 colnames(orderSocial) <- c('询盘时间', '国家', '公司名称', '联系人', '联系方式', '邮箱', '询盘内容', '跟进人')
+
+save(orderWeb, orderSocial, file = "data.RData")
