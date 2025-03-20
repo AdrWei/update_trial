@@ -20,13 +20,22 @@ orderSocial = pd.read_csv("orderSocial.csv")
 
 # 打开 Google Sheet
 try:
+    # 获取 Google Sheet
+    spreadsheet = client.open_by_key(sheet_id)
+
     # 写入 orderWeb 到第一个工作表
-    sheet = client.open_by_key(sheet_id).get_worksheet(0)  # 第一个工作表
+    try:
+        sheet = spreadsheet.worksheet("orderWeb")  # 尝试获取名为 "orderWeb" 的工作表
+    except gspread.exceptions.WorksheetNotFound:
+        sheet = spreadsheet.add_worksheet(title="orderWeb", rows=100, cols=20)  # 如果不存在，创建新工作表
     sheet.clear()  # 清空现有数据
     sheet.update([orderWeb.columns.values.tolist()] + orderWeb.values.tolist())  # 写入表头和数据
 
     # 写入 orderSocial 到第二个工作表
-    sheet = client.open_by_key(sheet_id).get_worksheet(1)  # 第二个工作表
+    try:
+        sheet = spreadsheet.worksheet("orderSocial")  # 尝试获取名为 "orderSocial" 的工作表
+    except gspread.exceptions.WorksheetNotFound:
+        sheet = spreadsheet.add_worksheet(title="orderSocial", rows=100, cols=20)  # 如果不存在，创建新工作表
     sheet.clear()  # 清空现有数据
     sheet.update([orderSocial.columns.values.tolist()] + orderSocial.values.tolist())  # 写入表头和数据
 
