@@ -79,6 +79,10 @@ while has_more and page <= MAX_PAGES:
 # 将数据转换为 DataFrame
 df = pd.DataFrame(all_data)
 
+# 清理非法浮点数值
+df = df.fillna("")  # 将 NaN 替换为空字符串
+df = df.replace([float('inf'), float('-inf')], "")  # 将 inf 和 -inf 替换为空字符串
+
 # 将 DataFrame 写入 Google Sheet
 try:
     # 清空现有数据（可选）
@@ -94,6 +98,3 @@ try:
 except Exception as e:
     print(f"写入 Google Sheet 时出错: {e}")
     raise
-
-# 清理：删除临时 JSON 文件
-os.remove("credentials.json")
