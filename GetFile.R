@@ -9,9 +9,6 @@ LOGIN_URL <- "https://admin.lifisher.com/api/login"
 USERNAME <- "15077219088"
 PASSWORD <- "15077219088"
 
-# 2. 数据导出路径
-OUTPUT_FILE <- "广告统计.xlsx"
-
 # 3. API 请求信息
 BASE_URL <- "https://api-qqt.weyescloud.com/jmc/inquiry/export"
 SITE_ID <- 5735
