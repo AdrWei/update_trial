@@ -22,7 +22,7 @@ jobs:
 
       - name: Install R dependencies
         run: |
-          install.packages("dplyr")  # 安装 R 依赖包
+          R -e "install.packages('dplyr')"  # 使用 R -e 安装 R 依赖包
 
       - name: Run R script
         run: Rscript GetFile.R  # 运行 R 程序
