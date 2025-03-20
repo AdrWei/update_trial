@@ -21,6 +21,12 @@ jobs:
         run: |
           R -e 'install.packages("googlesheets4", repos = "https://cloud.r-project.org", lib = "/home/runner/work/_temp/Library")'
 
+      - name: List installed packages
+        env:
+          R_LIBS_USER: /home/runner/work/_temp/Library  # 显式设置 R 包库路径
+        run: |
+          R -e 'print(installed.packages()[, "Package"])'
+
       - name: Check if googlesheets4 is installed
         env:
           R_LIBS_USER: /home/runner/work/_temp/Library  # 显式设置 R 包库路径
