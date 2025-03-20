@@ -35,7 +35,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas gspread oauth2client
+          pip install pandas gspread oauth2client rpy2
 
       - name: Write Google Credentials
         run: |
