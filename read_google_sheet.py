@@ -98,21 +98,37 @@ all_titles = sorted([title for title in all_titles if title])
 # 转换为宽格式
 final_df = NonFB.explode('custom_config').pivot(index='inquiry_id', columns='custom_config', values='content')
 
-# 清理合并内容
-cleaned_df = final_df.assign(
-    company_name=final_df[['Company Name', 'company', 'Azienda', 'Bedrijf', 'Empresa', 'Firma', 'Nom de la compagnie', 'Nome dell\'azienda', 'Şirket Adı', 'اسم الشركة', '公司名称', '회사', '회사 이름']].bfill(axis=1).iloc[:, 0],
-    country=final_df[['country', 'Land', 'Paese', 'País', 'Kraj', '국가']].bfill(axis=1).iloc[:, 0],
-    phone=final_df[['phone', 'telefon', 'Telefono', 'Teléfono', 'telefoon', 'Phone/WhatsApp/Skype', 'Telefono/WhatsApp/Skype', 'Telefon/WhatsApp/Skype', 'الهاتف/الواتساب/سكايب', '电话/WhatsApp/Skype', '전화', '전화/WhatsApp/Skype', 'WhatsApp', 'Whatsapp', '왓츠앱']].bfill(axis=1).iloc[:, 0],
-    skype=final_df[['skype', 'Skype', 'Skype\'a', 'Skypen', '스카이프']].bfill(axis=1).iloc[:, 0]
-).reset_index()
+# 动态处理列名
+possible_columns = ['Company Name', 'company', 'Azienda', 'Bedrijf', 'Empresa', 'Firma', 'Nom de la compagnie', 'Nome dell\'azienda', 'Şirket Adı', 'اسم الشركة', '公司名称', '회사', '회사 이름']
+available_columns = [col for col in possible_columns if col in final_df.columns]
 
-# 整理新的NonFB数据表格
+# 处理 company_name
+if available_columns:
+    company_name = final_df[available_columns].bfill(axis=1).iloc[:, 0]
+else:
+    company_name = None  # 如果没有匹配的列，设置为 None 或其他默认值
+
+# 处理其他字段（如 country, phone, skype）
+possible_country_columns = ['country', 'Land', 'Paese', 'País', 'Kraj', '국가']
+available_country_columns = [col for col in possible_country_columns if col in final_df.columns]
+country = final_df[available_country_columns].bfill(axis=1).iloc[:, 0] if available_country_columns else None
+
+possible_phone_columns = ['phone', 'telefon', 'Telefono', 'Teléfono', 'telefoon', 'Phone/WhatsApp/Skype', 'Telefono/WhatsApp/Skype', 'Telefon/WhatsApp/Skype', 'الهاتف/الواتساب/سكايب', '电话/WhatsApp/Skype', '전화', '전화/WhatsApp/Skype', 'WhatsApp', 'Whatsapp', '왓츠앱']
+available_phone_columns = [col for col in possible_phone_columns if col in final_df.columns]
+phone = final_df[available_phone_columns].bfill(axis=1).iloc[:, 0] if available_phone_columns else None
+
+possible_skype_columns = ['skype', 'Skype', 'Skype\'a', 'Skypen', '스카이프']
+available_skype_columns = [col for col in possible_skype_columns if col in final_df.columns]
+skype = final_df[available_skype_columns].bfill(axis=1).iloc[:, 0] if available_skype_columns else None
+# ===== 插入新代码结束 =====
+
+# 整理新的 NonFB 数据表格
 WebInquiry = pd.DataFrame({
     '询盘时间': NonFB['create_time'],
     '国家': NonFB['ip_country'],
-    '公司名称': cleaned_df['company_name'],
+    '公司名称': company_name,
     '联系人': NonFB['contacts'],
-    '联系方式': cleaned_df['phone'],
+    '联系方式': phone,
     '邮箱': NonFB['email'],
     '询盘内容': NonFB['content'],
     '跟进人': NonFB['account_name']
