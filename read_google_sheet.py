@@ -120,7 +120,6 @@ phone = final_df[available_phone_columns].bfill(axis=1).iloc[:, 0] if available_
 possible_skype_columns = ['skype', 'Skype', 'Skype\'a', 'Skypen', '스카이프']
 available_skype_columns = [col for col in possible_skype_columns if col in final_df.columns]
 skype = final_df[available_skype_columns].bfill(axis=1).iloc[:, 0] if available_skype_columns else None
-# ===== 插入新代码结束 =====
 
 # 整理新的 NonFB 数据表格
 WebInquiry = pd.DataFrame({
