@@ -27,8 +27,8 @@ except Exception as e:
     print(f"Error: {e}")
     raise
 
-LIFISHER_TOKEN = json.loads(os.getenv("LIFISHER_TOKEN")
-TOKEN = "".join([LIFISHER_TOKEN["Token_1"], LIFISHER_TOKEN["Token_2"], LIFISHER_TOKEN["Token_3"], LIFISHER_TOKEN["Token_4"]])
+LIFISHER_TOKEN = json.loads(os.getenv("LIFISHER_TOKEN"))
+TOKEN = "".join([LIFISHER_TOKEN["TOKEN_1"], LIFISHER_TOKEN["TOKEN_2"], LIFISHER_TOKEN["TOKEN_3"], LIFISHER_TOKEN["TOKEN_4"]])
 
 
 # 常量定义
