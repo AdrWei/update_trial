@@ -17,6 +17,8 @@ jobs:
 
       - name: Install dependencies
         run: |
+          mkdir -p $HOME/R/library
+          echo "R_LIBS_USER=$HOME/R/library" >> $GITHUB_ENV
           R -e 'install.packages("googlesheets4", repos = "https://cloud.r-project.org")'
 
       - name: Update Google Sheet
