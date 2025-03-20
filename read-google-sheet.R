@@ -1,5 +1,14 @@
+# 打印当前的包库路径
+print(.libPaths())
+
 # 显式设置 R 包库路径
 .libPaths("/home/runner/work/_temp/Library")
+
+# 再次打印当前的包库路径
+print(.libPaths())
+
+# 列出已安装的包
+print(installed.packages()[, "Package"])
 
 # 加载 googlesheets4 包
 library(googlesheets4)
