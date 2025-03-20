@@ -1,34 +1,41 @@
-name: Read Google Sheet with Python
+name: Run R and Python Scripts
 
 on:
   workflow_dispatch:  # 允许手动触发
+  schedule:
+    - cron: '0 0 * * *'  # 每天午夜运行
 
 jobs:
-  read-sheet:
+  run-scripts:
     runs-on: ubuntu-latest
-    environment: Lifisher_Sheet_Secrets  # 指定环境
+    env:
+      SHEET_ID: ${{ secrets.SHEET_ID }}  # 从 GitHub Secrets 中获取 Google Sheet ID
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.3.1'  # 指定 R 版本
+
+      - name: Install R dependencies
+        run: |
+          install.packages("dplyr")  # 安装 R 依赖包
+
+      - name: Run R script
+        run: Rscript GetFile.R  # 运行 R 程序
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: '3.8'  # 指定 Python 版本
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install gspread oauth2client
           pip install pandas gspread oauth2client
-          
-      - name: Read Google Sheet
-        env:
-          SHEET_KEY: ${{ secrets.SHEET_KEY }}  # 从 Secrets 中获取 JSON 密钥
-          SHEET_ID: ${{ secrets.SHEET_ID }}    # 从 Secrets 中获取 Sheet ID
-          LIFISHER_TOKEN: ${{ secrets.LIFISHER_TOKEN }}
-          
-        run: |
-          echo "$SHEET_KEY" > credentials.json
-          python read_google_sheet.py
+
+      - name: Run Python script
+        run: python read_google_sheet.py  # 运行 Python 程序
