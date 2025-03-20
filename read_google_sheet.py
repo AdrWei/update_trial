@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import rpy2.robjects as ro
+from rpy2.robjects import pandas2ri
 
 # 设置 Google Sheets API 的权限范围
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -14,9 +16,11 @@ sheet_id = os.getenv("SHEET_ID")  # 从环境变量中获取 Google Sheet ID
 creds = ServiceAccountCredentials.from_json_keyfile_name(json_key, scope)
 client = gspread.authorize(creds)
 
-# 读取 R 生成的表
-orderWeb = pd.read_csv("orderWeb.csv")  # 假设 R 程序将表保存为 CSV 文件
-orderSocial = pd.read_csv("orderSocial.csv")
+# 加载 R 数据
+pandas2ri.activate()  # 激活 pandas 和 R 的转换
+ro.r['load']("data.RData")  # 加载 RData 文件
+orderWeb = ro.r['orderWeb']  # 获取 orderWeb 数据框
+orderSocial = ro.r['orderSocial']  # 获取 orderSocial 数据框
 
 # 打开 Google Sheet
 try:
