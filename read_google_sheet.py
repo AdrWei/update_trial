@@ -79,88 +79,21 @@ while has_more and page <= MAX_PAGES:
 # 将数据转换为 DataFrame
 df = pd.DataFrame(all_data)
 
-# 询盘分类
-gsaData = df[df['source'] == '4']
-orgData = df[df['source'] == '7']
-fbTrans = df[df['source'] == '20']
-NonFB = pd.concat([gsaData, orgData, fbTrans])
-fbData = df[df['source'] == '12']
+# 将 DataFrame 写入 Google Sheet
+try:
+    # 清空现有数据（可选）
+    sheet.clear()
 
-# 非FB表单处理
-gtitle = NonFB['custom_config'].apply(lambda x: x['title'] if x else None)
-all_titles = gtitle.dropna().unique()
-result_list = all_titles.tolist()
+    # 写入表头
+    sheet.update([df.columns.values.tolist()], 'A1')
 
-# 动态获取所有标题
-all_titles = list(set(result_list + [col for col in df.columns if col not in result_list]))
-all_titles = sorted([title for title in all_titles if title])
+    # 写入数据
+    sheet.update(df.values.tolist(), 'A2')
 
-# 转换为宽格式
-final_df = NonFB.explode('custom_config').pivot(index='inquiry_id', columns='custom_config', values='content')
-
-# 动态处理列名
-possible_columns = ['Company Name', 'company', 'Azienda', 'Bedrijf', 'Empresa', 'Firma', 'Nom de la compagnie', 'Nome dell\'azienda', 'Şirket Adı', 'اسم الشركة', '公司名称', '회사', '회사 이름']
-available_columns = [col for col in possible_columns if col in final_df.columns]
-
-# 处理 company_name
-if available_columns:
-    company_name = final_df[available_columns].bfill(axis=1).iloc[:, 0]
-else:
-    company_name = None  # 如果没有匹配的列，设置为 None 或其他默认值
-
-# 处理其他字段（如 country, phone, skype）
-possible_country_columns = ['country', 'Land', 'Paese', 'País', 'Kraj', '국가']
-available_country_columns = [col for col in possible_country_columns if col in final_df.columns]
-country = final_df[available_country_columns].bfill(axis=1).iloc[:, 0] if available_country_columns else None
-
-possible_phone_columns = ['phone', 'telefon', 'Telefono', 'Teléfono', 'telefoon', 'Phone/WhatsApp/Skype', 'Telefono/WhatsApp/Skype', 'Telefon/WhatsApp/Skype', 'الهاتف/الواتساب/سكايب', '电话/WhatsApp/Skype', '전화', '전화/WhatsApp/Skype', 'WhatsApp', 'Whatsapp', '왓츠앱']
-available_phone_columns = [col for col in possible_phone_columns if col in final_df.columns]
-phone = final_df[available_phone_columns].bfill(axis=1).iloc[:, 0] if available_phone_columns else None
-
-possible_skype_columns = ['skype', 'Skype', 'Skype\'a', 'Skypen', '스카이프']
-available_skype_columns = [col for col in possible_skype_columns if col in final_df.columns]
-skype = final_df[available_skype_columns].bfill(axis=1).iloc[:, 0] if available_skype_columns else None
-
-# 整理新的 NonFB 数据表格
-WebInquiry = pd.DataFrame({
-    '询盘时间': NonFB['create_time'],
-    '国家': NonFB['ip_country'],
-    '公司名称': company_name,
-    '联系人': NonFB['contacts'],
-    '联系方式': phone,
-    '邮箱': NonFB['email'],
-    '询盘内容': NonFB['content'],
-    '跟进人': NonFB['account_name']
-})
-
-# 整理新的FB数据表格
-info = fbData['content']
-email = info.str.extract(r'email: ([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})')[0]
-phone_number = info.str.extract(r'phone number: (\+?[0-9]+)')[0]
-content = info.str.extract(r'content: ([^\n]+)')[0]
-full_name = info.str.extract(r'full name: ([^\n]+)')[0]
-company_name = info.str.extract(r'company name: ([^\n]+)')[0]
-
-SocialInquiry = pd.DataFrame({
-    '询盘时间': fbData['create_time'],
-    '国家': fbData['ip_country'],
-    '公司名称': company_name,
-    '联系人': full_name,
-    '联系方式': phone_number,
-    '邮箱': email,
-    '询盘内容': content,
-    '跟进人': fbData['account_name']
-})
-
-# 按时间顺序排列
-WebInquiry['询盘时间'] = pd.to_datetime(WebInquiry['询盘时间'])
-SocialInquiry['询盘时间'] = pd.to_datetime(SocialInquiry['询盘时间'])
-orderWeb = WebInquiry.sort_values(by='询盘时间')
-orderSocial = SocialInquiry.sort_values(by='询盘时间')
-
-# 将数据写入 Google Sheets
-sheet.update([orderWeb.columns.values.tolist()] + orderWeb.values.tolist(), 'A1')
-sheet.update([orderSocial.columns.values.tolist()] + orderSocial.values.tolist(), 'A' + str(len(orderWeb) + 2))
+    print("数据成功写入 Google Sheet！")
+except Exception as e:
+    print(f"写入 Google Sheet 时出错: {e}")
+    raise
 
 # 清理：删除临时 JSON 文件
 os.remove("credentials.json")
