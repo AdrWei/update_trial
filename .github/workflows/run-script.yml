@@ -21,9 +21,10 @@ jobs:
           echo "R_LIBS_USER=$HOME/R/library" >> $GITHUB_ENV
           R -e 'install.packages("googlesheets4", repos = "https://cloud.r-project.org")'
 
-      - name: Update Google Sheet
+      - name: Run R
         env:
           SHEET_KEY: ${{ secrets.SHEET_KEY }}  # 从 Secrets 中获取 JSON 密钥
           SHEET_ID: ${{ secrets.SHEET_ID }}    # 从 Secrets 中获取 Sheet ID
+          R_LIBS_USER: /home/runner/work/_temp/Library  # 显式设置 R 包库路径
         run: |
           Rscript read-google-sheet.R
