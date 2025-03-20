@@ -27,6 +27,10 @@ except Exception as e:
     print(f"Error: {e}")
     raise
 
+LIFISHER_TOKEN = json.loads(os.getenv("LIFISHER_TOKEN")
+TOKEN = "".join([LIFISHER_TOKEN["Token_1"], LIFISHER_TOKEN["Token_2"], LIFISHER_TOKEN["Token_3"], LIFISHER_TOKEN["Token_4"]])
+
+
 # 常量定义
 LOGIN_URL = "https://admin.lifisher.com/api/login"
 USERNAME = "15077219088"
@@ -38,7 +42,7 @@ MAX_PAGES = 100
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
     "appkey": "man2oqlx6oqnf2wzhhrbarih2zlmoe7ckb00aec53knzelpw8ogc4g8ws880o00b",
-    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb2QiOiIzODUyNTItODMzMzcwLTExNjA5NjgtODU0MDQ5LTkyNDQ0MCIsInVzciI6IjE1MDc3MjE5MDg4IiwiZXhwIjoxNzQyNDM4MjE1LCJpYXQiOjE3NDEyMjg2MTUsImp0aSI6InByMGdyM3Vmc291ajVvdGdqOHNjZmZlazlwIn0.u6gOkTK-KY1EZTl5E-yIThtja549TOWWO2fQsQybz8g",
+    "token": TOKEN,
     "domain": "statistics.lifisher.com",
     "Referer": "https://statistics.lifisher.com/",
     "timestamp": str(int(datetime.now().timestamp() * 1000))
