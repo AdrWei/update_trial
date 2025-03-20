@@ -1,31 +1,30 @@
-name: Read Google Sheet with Python
+name: Run Python Script
 
-on:
-  workflow_dispatch:  # 允许手动触发
+on: [push]
 
 jobs:
-  read-sheet:
+  run-script:
     runs-on: ubuntu-latest
-    environment: Lifisher_Sheet_Secrets  # 指定环境
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install gspread oauth2client
+          pip install pandas gspread oauth2client
 
-      - name: Read Google Sheet
+      - name: Write SHEET_KEY to credentials.json
+        run: echo "$SHEET_KEY" > credentials.json
+
+      - name: Run Python script
+        run: python read_google_sheet.py
         env:
-          SHEET_KEY: ${{ secrets.SHEET_KEY }}  # 从 Secrets 中获取 JSON 密钥
-          SHEET_ID: ${{ secrets.SHEET_ID }}    # 从 Secrets 中获取 Sheet ID
-        run: |
-          echo "$SHEET_KEY" > credentials.json
-          python read_google_sheet.py
+          SHEET_KEY: ${{ secrets.SHEET_KEY }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
