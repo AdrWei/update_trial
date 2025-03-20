@@ -1,3 +1,7 @@
+# 显式设置 R 包库路径
+.libPaths("/home/runner/work/_temp/Library")
+
+# 加载 googlesheets4 包
 library(googlesheets4)
 
 # 从环境变量中获取服务账号 JSON 和 Google Sheet ID
