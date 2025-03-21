@@ -30,7 +30,7 @@ tryCatch({
   APPKEY <<- codes$APPKEY
   
   ## 重组 TOKEN
-  TOKEN <<- paste0(token_parts$Token_1, token_parts$Token_2, token_parts$Token_3, token_parts$Token_4)
+  TOKEN <<- "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb2QiOiI0MDYzLTg4NDc1Ni05Mzk3ODUtMTAzNjczOS0yMzY3NTciLCJ1c3IiOiIxNTA3NzIxOTA4OCIsImV4cCI6MTc0MzY2ODAzNSwiaWF0IjoxNzQyNDU4NDM1LCJqdGkiOiIwOWRmNGMycGx0OG44MDFxNHZzN2lnc2VrdSJ9.FcBKm5wDBL5ZP6_R15U9t2wxZBvj4gyNa48zXTk77Ig"
   
   # 常量定义
   LOGIN_URL <<- constants$LOGIN_URL
