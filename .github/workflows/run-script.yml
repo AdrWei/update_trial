@@ -1,55 +1,40 @@
-name: Run Python Script
+libraries:
+  - httr
+  - jsonlite
+  - dplyr
+  - tidyr
 
-on:
-  workflow_dispatch:  # 允许手动触发
-  schedule:
-    - cron: '0 0 * * *'  # 每天午夜运行
+constants:
+  login_url: "https://admin.lifisher.com/api/login"
+  username: "15077219088"
+  password: "15077219088"
+  base_url: "https://api-qqt.weyescloud.com/jmc/inquiry/export"
+  site_id: 5735
+  page_size: 200
+  max_pages: 100
 
-jobs:
-  run-script:
-    runs-on: ubuntu-latest
-    env:
-      SHEET_ID: ${{ secrets.SHEET_ID }}  # 从 GitHub Secrets 中获取 Google Sheet ID
+headers:
+  User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+  appkey: "man2oqlx6oqnf2wzhhrbarih2zlmoe7ckb00aec53knzelpw8ogc4g8ws880o00b"
+  token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb2QiOiI0MDYzLTg4NDc1Ni05Mzk3ODUtMTAzNjczOS0yMzY3NTciLCJ1c3IiOiIxNTA3NzIxOTA4OCIsImV4cCI6MTc0MzY2ODAzNSwiaWF0IjoxNzQyNDU4NDM1LCJqdGkiOiIwOWRmNGMycGx0OG44MDFxNHZzN2lnc2VrdSJ9.FcBKm5wDBL5ZP6_R15U9t2wxZBvj4gyNa48zXTk77Ig"
+  domain: "statistics.lifisher.com"
+  Referer: "https://statistics.lifisher.com/"
+  timestamp: "{{ as.character(as.numeric(Sys.time()) * 1000) }}"
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+data_processing:
+  remove_empty:
+    cols: "cols"
+    rows: "rows"
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'  # 指定 Python 版本
+data_sources:
+  gsaData: "source == '4'"
+  orgData: "source == '7'"
+  fbTrans: "source == '20'"
+  fbData: "source == '12'"
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pandas gspread oauth2client rpy2
-
-      - name: Write Google Credentials
-        run: |
-          echo "${{ secrets.GOOGLE_CREDENTIALS }}" > credentials.json
-
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: '4.3.1'  # 指定 R 版本
-
-      - name: Cache R packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.R/library
-          key: r-packages-${{ hashFiles('**/DESCRIPTION') }}
-          restore-keys: |
-            r-packages-
-
-      - name: Install R dependencies
-        run: |
-          Rscript -e 'install.packages(c("httr", "jsonlite", "tidyverse", "janitor"), repos="https://cloud.r-project.org", dependencies=TRUE)'
-
-      - name: Run Python script
-        run: python your_script.py  # 运行你的 Python 脚本
+output:
+  files:
+    - name: "data.RData"
+      objects:
+        - orderWeb
+        - orderSocial
