@@ -1,14 +1,14 @@
-name: Run R Script
+name: Run R Script and Update Google Sheets
 
 on:
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
-    environment: Lifisher_Sheet_Secrets  # 指定环境名称
+    environment: Lifisher_Sheet_Secrets
     steps:
-      - uses: actions/checkout@v3  # 拉取代码
+      - uses: actions/checkout@v3
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
@@ -18,30 +18,43 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev libxml2-dev  # 安装 libcurl 和 libxml2 系统依赖
-
-      - name: Cache R packages
-        id: cache-r-packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.R/library  # R 依赖包的默认安装路径
-          key: r-packages-${{ hashFiles('**/DESCRIPTION') }}  # 根据 DESCRIPTION 文件生成缓存键
-          restore-keys: |
-            r-packages-
+          sudo apt-get install -y libcurl4-openssl-dev libxml2-dev
 
       - name: Install R dependencies
         run: |
           Rscript -e 'install.packages(c("httr", "dplyr", "jsonlite", "tidyr"), repos="https://cloud.r-project.org")'
-      
-      - name: Debug environment variables
-        run: |
-          echo "LIFISHER_CODES: $LIFISHER_CODES"
-          echo "LIFISHER_TOKEN: $LIFISHER_TOKEN"
-          echo "LIFISHER_VARIABLES: $LIFISHER_VARIABLES"
-          
+
       - name: Run R script
-        run: Rscript GetFile.R
         env:
-          LIFISHER_CODES: ${{ secrets.LIFISHER_CODES }}
+          LIFISHER_USERNAME: ${{ secrets.LIFISHER_USERNAME }}
+          LIFISHER_PASSWORD: ${{ secrets.LIFISHER_PASSWORD }}
+          LIFISHER_APPKEY: ${{ secrets.LIFISHER_APPKEY }}
           LIFISHER_TOKEN: ${{ secrets.LIFISHER_TOKEN }}
-          LIFISHER_VARIABLES: ${{ vars.LIFISHER_VARIABLES }}
+        run: Rscript GetFile.R
+
+  update-sheets:
+    runs-on: ubuntu-latest
+    needs: run-script
+    environment: Lifisher_Sheet_Secrets
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Python dependencies
+        run: |
+          pip install pandas gspread oauth2client rpy2
+
+      - name: Create credentials file
+        run: echo '${{ secrets.SHEET_KEY }}' > credentials.json
+
+      - name: Run Python script
+        env:
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+        run: python Update_Sheet.py
+
+      - name: Remove credentials file
+        run: rm credentials.json
