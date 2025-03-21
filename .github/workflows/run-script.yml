@@ -49,7 +49,7 @@ jobs:
 
       - name: Install R dependencies
         run: |
-          Rscript -e 'install.packages(c("httr", "jsonlite", "dplyr", "tidyr"), repos="https://cloud.r-project.org", dependencies=TRUE)'
+          Rscript -e 'install.packages(c("httr", "jsonlite", "tidyverse", "janitor"), repos="https://cloud.r-project.org", dependencies=TRUE)'
 
       - name: Run Python script
         run: python your_script.py  # 运行你的 Python 脚本
