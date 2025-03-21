@@ -269,31 +269,23 @@ tryCatch({
 
   # 处理 orderWeb 工作表
   if ("orderWeb" %in% sheet_names(spreadsheet)) {
-    # 如果工作表存在，读取现有数据
-    existing_web_data <- read_sheet(spreadsheet, sheet = "orderWeb")
-    # 合并新数据和现有数据
-    updated_web_data <- bind_rows(existing_web_data, orderWeb)
+    # 如果工作表存在，直接覆盖数据
+    range_write(spreadsheet, data = orderWeb, sheet = "orderWeb", range = "A1", col_names = TRUE)
   } else {
-    # 如果工作表不存在，创建新工作表
-    updated_web_data <- orderWeb
+    # 如果工作表不存在，创建新工作表并写入数据
     sheet_add(spreadsheet, sheet = "orderWeb", .before = 1)
+    range_write(spreadsheet, data = orderWeb, sheet = "orderWeb", range = "A1", col_names = TRUE)
   }
-  # 更新 orderWeb 工作表
-  write_sheet(updated_web_data, spreadsheet, sheet = "orderWeb")
 
   # 处理 orderSocial 工作表
   if ("orderSocial" %in% sheet_names(spreadsheet)) {
-    # 如果工作表存在，读取现有数据
-    existing_social_data <- read_sheet(spreadsheet, sheet = "orderSocial")
-    # 合并新数据和现有数据
-    updated_social_data <- bind_rows(existing_social_data, orderSocial)
+    # 如果工作表存在，直接覆盖数据
+    range_write(spreadsheet, data = orderSocial, sheet = "orderSocial", range = "A1", col_names = TRUE)
   } else {
-    # 如果工作表不存在，创建新工作表
-    updated_social_data <- orderSocial
+    # 如果工作表不存在，创建新工作表并写入数据
     sheet_add(spreadsheet, sheet = "orderSocial", .before = 2)
+    range_write(spreadsheet, data = orderSocial, sheet = "orderSocial", range = "A1", col_names = TRUE)
   }
-  # 更新 orderSocial 工作表
-  write_sheet(updated_social_data, spreadsheet, sheet = "orderSocial")
 
   print("数据成功写入 Google Sheet！")
 }, error = function(e) {
