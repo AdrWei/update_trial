@@ -2,6 +2,7 @@ library(httr)
 library(jsonlite)
 library(dplyr)
 library(tidyr)
+library(googlesheets4)
 
 # 替换 janitor::remove_empty 函数
 remove_empty <- function(df, which = "cols") {
