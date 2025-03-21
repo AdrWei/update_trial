@@ -6,7 +6,7 @@ on:
 jobs:
   run-script:
     runs-on: ubuntu-latest
-    environment: LIFISHER_SECRETS  # 指定环境名称
+    environment: Lifisher_Sheet_Secrets  # 指定环境名称
     steps:
       - uses: actions/checkout@v3  # 拉取代码
 
@@ -35,3 +35,7 @@ jobs:
 
       - name: Run R script
         run: Rscript GetFile.R
+        env:
+          LIFISHER_CODE: ${{ secrets.LIFISHER_CODE }}
+          LIFISHER_TOKEN: ${{ secrets.LIFISHER_TOKEN }}
+          LIFISHER_VARIABLES: ${{ vars.LIFISHER_VARIABLES }}
