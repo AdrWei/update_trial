@@ -287,6 +287,11 @@ tryCatch({
     range_write(spreadsheet, data = orderSocial, sheet = "orderSocial", range = "A1", col_names = TRUE)
   }
 
+  # 设置统一行高
+  sheet_properties <- sheet_properties(spreadsheet)
+  sheet_properties$defaultFormat$rowHeight <- 21  # 设置统一的行高（单位：像素）
+  sheet_update(spreadsheet, sheet_properties)
+  
   print("数据成功写入 Google Sheet！")
 }, error = function(e) {
   print(paste("Error:", e$message))
