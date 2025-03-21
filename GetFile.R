@@ -2,9 +2,8 @@
 library(httr)
 library(jsonlite)
 library(dplyr)
-library(tidyr)
 
-  tryCatch({
+tryCatch({
   ## 环境变量
   lifisher_codes <- Sys.getenv("LIFISHER_CODES")
   lifisher_token <- Sys.getenv("LIFISHER_TOKEN")
@@ -16,21 +15,21 @@ library(tidyr)
   constants <- fromJSON(lifisher_variables)
   
   # 提取 JSON 中的值
-  USERNAME <- codes$USERNAME
-  PASSWORD <- codes$PASSWORD
-  APPKEY <- codes$APPKEY
+  USERNAME <<- codes$USERNAME
+  PASSWORD <<- codes$PASSWORD
+  APPKEY <<- codes$APPKEY
   
   ## 重组 TOKEN
-  TOKEN <- paste0(token_parts$Token_1, token_parts$Token_2, token_parts$Token_3, token_parts$Token_4)
+  TOKEN <<- paste0(token_parts$Token_1, token_parts$Token_2, token_parts$Token_3, token_parts$Token_4)
   
   # 常量定义
-  LOGIN_URL <- constants$LOGIN_URL
-  DOMAIN <- constants$DOMAIN
-  REFERER <- constants$REFERER
-  SITE_ID <- constants$SITE_ID
-  BASE_URL <- constants$BASE_URL   
+  LOGIN_URL <<- constants$LOGIN_URL
+  DOMAIN <<- constants$DOMAIN
+  REFERER <<- constants$REFERER
+  SITE_ID <<- constants$SITE_ID
+  BASE_URL <<- constants$BASE_URL   
 }, error = function(e) {
-  print(paste("Error:", e$message))
+  stop(paste("初始化失败：", e$message))
 })
 
 # 2. API 请求信息
@@ -52,11 +51,11 @@ WEB_INQUIRY_COLUMNS <- c('询盘时间', '国家', '公司名称', '联系人', 
 SOCIAL_INQUIRY_COLUMNS <- c('询盘时间', '国家', '公司名称', '联系人', '联系方式', '邮箱', '询盘内容', '跟进人')
 
 # 5. 正则表达式
-EMAIL_REGEX <- "email: [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
-PHONE_REGEX <- "phone number: \\+?[0-9]+"
-CONTENT_REGEX <- "content: [^\n]+"
-FULL_NAME_REGEX <- "full name: [^\n]+"
-COMPANY_NAME_REGEX <- "company name: [^\n]+"
+EMAIL_REGEX <- "email: ([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})"
+PHONE_REGEX <- "phone number: (\\+?[0-9]+)"
+CONTENT_REGEX <- "content: ([^\n]+)"
+FULL_NAME_REGEX <- "full name: ([^\n]+)"
+COMPANY_NAME_REGEX <- "company name: ([^\n]+)"
 
 # 替换 janitor::remove_empty 函数
 remove_empty <- function(df, which = "cols") {
@@ -77,8 +76,7 @@ response <- GET(
 )
 
 # 2. 提取 Cookies 并转换为字符向量
-cookies_vec <- cookies(response) |>
-  paste(.$name, .$value, sep = "=")
+cookies_vec <- paste(cookies(response)$name, cookies(response)$value, sep = "=")
 
 # 3. 使用 Cookies 访问受保护页面
 protected_page <- GET(
@@ -121,53 +119,52 @@ NonFB <- bind_rows(gsaData, orgData, fbTrans)
 fbData <- filter(all_data, source == "12")
 
 # 非FB表单处理 ----
-cleaned_df <- NonFB$custom_config |>
-  map_df(~ {
-    if (identical(dim(.x), c(0L, 0L))) {
-      tibble(inquiry_id = NA_character_, title = NA_character_, content = NA_character_)
-    } else {
-      .x |>
-        mutate(across(everything(), as.character)) |>
-        select(inquiry_id, title, content)
-    }
-  }) |>
+cleaned_df <- do.call(rbind, lapply(NonFB$custom_config, function(x) {
+  if (identical(dim(x), c(0L, 0L))) {
+    data.frame(inquiry_id = NA_character_, title = NA_character_, content = NA_character_)
+  } else {
+    x %>%
+      mutate(across(everything(), as.character)) %>%
+      select(inquiry_id, title, content)
+  }
+})) %>%
   pivot_wider(
     id_cols = inquiry_id,
     names_from = title,
     values_from = content,
     values_fn = ~ paste(na.omit(.), collapse = "|"),
     values_fill = NA
-  ) |>
+  ) %>%
   mutate(
     company_name = coalesce(`Company Name`, company, Azienda, Bedrijf, Empresa, Firma, `Nom de la compagnie`, `Nome dell'azienda`, `Şirket Adı`, `اسم الشركة`, 公司名称, 회사, `회사 이름`),
     country = coalesce(country, Land, Paese, País, Kraj, 국가),
     phone = coalesce(phone, telefon, Telefono, Teléfono, telefoon, `Phone/WhatsApp/Skype`, `Telefono/WhatsApp/Skype`, `Telefon/WhatsApp/Skype`, `الهاتف/الواتساب/سكايب`, `电话/WhatsApp/Skype`, 전화, `전화/WhatsApp/Skype`, WhatsApp, Whatsapp, 왓츠앱),
     skype = coalesce(skype, Skype, `Skype'a`, Skypen, 스카이프)
-  ) |>
-  select(inquiry_id, company_name, country, phone, skype, everything()) |>
-  remove_empty("cols") |>
+  ) %>%
+  select(inquiry_id, company_name, country, phone, skype, everything()) %>%
+  remove_empty("cols") %>%
   mutate(across(where(is.character), ~ na_if(., "")))
 
 # 整理 NonFB 数据表格
-WebInquiry <- NonFB |>
-  select(create_time, ip_country, contacts, email, content, account_name) |>
-  bind_cols(cleaned_df |> select(company_name, phone)) |>
-  setNames(WEB_INQUIRY_COLUMNS) |>
-  mutate(across(1, ~ as.POSIXct(.x, format = "%Y-%m-%d %H:%M:%S"))) |>
+WebInquiry <- NonFB %>%
+  select(create_time, ip_country, contacts, email, content, account_name) %>%
+  bind_cols(cleaned_df %>% select(company_name, phone)) %>%
+  setNames(WEB_INQUIRY_COLUMNS) %>%
+  mutate(across(1, ~ as.POSIXct(.x, format = "%Y-%m-%d %H:%M:%S"))) %>%
   arrange(1)
 
 # 整理 FB 数据表格
-SocialInquiry <- fbData |>
+SocialInquiry <- fbData %>%
   mutate(
-    email = str_extract(content, EMAIL_REGEX) |> str_remove("email: "),
-    phone_number = str_extract(content, PHONE_REGEX) |> str_remove("phone number: "),
-    content = str_extract(content, CONTENT_REGEX) |> str_remove("content: "),
-    full_name = str_extract(content, FULL_NAME_REGEX) |> str_remove("full name: "),
-    company_name = str_extract(content, COMPANY_NAME_REGEX) |> str_remove("company name: ")
-  ) |>
-  select(create_time, ip_country, company_name, full_name, phone_number, email, content, account_name) |>
-  setNames(SOCIAL_INQUIRY_COLUMNS) |>
-  mutate(across(1, ~ as.POSIXct(.x, format = "%Y-%m-%d %H:%M:%S"))) |>
+    email = sub(EMAIL_REGEX, "\\1", content),
+    phone_number = sub(PHONE_REGEX, "\\1", content),
+    content = sub(CONTENT_REGEX, "\\1", content),
+    full_name = sub(FULL_NAME_REGEX, "\\1", content),
+    company_name = sub(COMPANY_NAME_REGEX, "\\1", content)
+  ) %>%
+  select(create_time, ip_country, company_name, full_name, phone_number, email, content, account_name) %>%
+  setNames(SOCIAL_INQUIRY_COLUMNS) %>%
+  mutate(across(1, ~ as.POSIXct(.x, format = "%Y-%m-%d %H:%M:%S"))) %>%
   arrange(1)
 
 # 保存数据
