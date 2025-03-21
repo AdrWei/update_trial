@@ -124,7 +124,6 @@ unique_titles <- unique(all_titles)                  # 去重
 result_list <- as.list(unique_titles)                # 转换为列表
 
 # 查看结果（按字母排序）
-result_list[order(unlist(result_list))]
 alist <- result_list
 
 # 2. 将content提取作新的列表
