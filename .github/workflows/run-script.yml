@@ -22,6 +22,8 @@ jobs:
 
       - name: Install R dependencies
         run: |
+          Rscript -e 'install.packages(c("httr", "jsonlite", "tidyverse", "janitor"), repos="https://cloud.r-project.org")'
+
           R -e "install.packages('dplyr')"  # 使用 R -e 安装 R 依赖包
 
       - name: Run R script
