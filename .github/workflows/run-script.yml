@@ -26,10 +26,9 @@ jobs:
 
       - name: Run R script
         env:
-          LIFISHER_USERNAME: ${{ secrets.LIFISHER_USERNAME }}
-          LIFISHER_PASSWORD: ${{ secrets.LIFISHER_PASSWORD }}
-          LIFISHER_APPKEY: ${{ secrets.LIFISHER_APPKEY }}
-          LIFISHER_TOKEN: ${{ secrets.LIFISHER_TOKEN }}
+          LIFISHER_CODES: ${{ secrets.LIFISHER_CODES }}  # 存储 USERNAME, PASSWORD, APPKEY 的 JSON 字符串
+          LIFISHER_TOKEN: ${{ secrets.LIFISHER_TOKEN }}  # 存储 TOKEN 部分的 JSON 字符串
+          LIFISHER_VARIABLES: ${{ vars.LIFISHER_VARIABLES }}  # 存储常量（LOGIN_URL, DOMAIN, REFERER, SITE_ID, BASE_URL）的 JSON 字符串
         run: Rscript GetFile.R
 
   update-sheets:
