@@ -1,9 +1,6 @@
 name: Run R Script and Update Google Sheets
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -25,7 +22,7 @@ jobs:
 
       - name: Install R dependencies
         run: |
-          Rscript -e 'install.packages(c("httr", "dplyr", "jsonlite", "tidyr"), repos="https://cloud.r-project.org")'
+          Rscript -e 'install.packages(c("httr", "dplyr", "jsonlite", "tidyr", "googlesheets4"), repos="https://cloud.r-project.org")'
 
       - name: Run R script
         env:
@@ -46,11 +43,10 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Reinstall R
+      - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.3.1'
-          update-packages: true
 
       - name: Install system dependencies for R
         run: |
@@ -62,9 +58,14 @@ jobs:
           which R
           R --version
 
-      - name: Set LD_LIBRARY_PATH
+      - name: Set R_HOME and LD_LIBRARY_PATH
         run: |
+          echo "R_HOME=$(R RHOME)" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=/opt/R/4.3.1/lib/R/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+      - name: Install R dependencies
+        run: |
+          Rscript -e 'install.packages(c("httr", "dplyr", "jsonlite", "tidyr", "googlesheets4"), repos="https://cloud.r-project.org")'
 
       - name: Install Python dependencies
         env:
