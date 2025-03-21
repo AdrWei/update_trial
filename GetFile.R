@@ -6,12 +6,12 @@ library(tidyr)
 
   tryCatch({
   ## 环境变量
-  lifisher_code <- Sys.getenv("LIFISHER_CODE")
+  lifisher_codes <- Sys.getenv("LIFISHER_CODES")
   lifisher_token <- Sys.getenv("LIFISHER_TOKEN")
   lifisher_variables <- Sys.getenv("LIFISHER_VARIABLES")
   
   # 解析 JSON
-  codes <- fromJSON(lifisher_code)
+  codes <- fromJSON(lifisher_codes)
   token_parts <- fromJSON(lifisher_token)
   constants <- fromJSON(lifisher_variables)
   
