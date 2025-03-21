@@ -15,6 +15,15 @@ jobs:
         with:
           r-version: '4.3.1'
 
+      - name: Cache R packages
+        id: cache-r-packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.R/library  # R 依赖包的默认安装路径
+          key: r-packages-${{ hashFiles('**/DESCRIPTION') }}  # 根据 DESCRIPTION 文件生成缓存键
+          restore-keys: |
+            r-packages-
+
       - name: Install dependencies
         run: |
           R -e "install.packages(c('httr', 'jsonlite', 'dplyr', 'tidyr'), repos = 'https://cloud.r-project.org')"
