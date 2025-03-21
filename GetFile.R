@@ -253,8 +253,8 @@ colnames(orderWeb) <- c('询盘时间', '国家', '公司名称', '联系人', '
 colnames(orderSocial) <- c('询盘时间', '国家', '公司名称', '联系人', '联系方式', '邮箱', '询盘内容', '跟进人')
 
 # 确保数据是数据框
-orderWeb <- as.data.frame(orderWeb)
-orderSocial <- as.data.frame(orderSocial)
+data_web <- as.data.frame(orderWeb)
+data_social <- as.data.frame(orderSocial)
 
 # 设置 Google Sheets API 的权限范围
 gs4_auth(path = "credentials.json")  # 加载服务账号的 JSON 密钥文件
