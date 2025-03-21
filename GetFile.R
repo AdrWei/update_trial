@@ -237,14 +237,22 @@ company_name <- sub("company name: ", "", company_name)
 # 写入Facebook询盘文件
 SocialInquiry <- as.data.frame(cbind(fbData$create_time, fbData$ip_country, company_name, full_name, phone_number, email, content, fbData$account_name))
 
-# 按时间顺序排列 ----
-WebInquiry$V1 <- as.POSIXct(WebInquiry$V1, format = "%Y-%m-%d %H:%M:%S")
-SocialInquiry$V1 <- as.POSIXct(SocialInquiry$V1, format = "%Y-%m-%d %H:%M:%S")
-orderWeb <- WebInquiry[order(WebInquiry$V1), ]
-orderSocial <- SocialInquiry[order(SocialInquiry$V1), ]
+# 生成 orderWeb 和 orderSocial 数据
+orderWeb <- WebInquiry
+orderSocial <- SocialInquiry
+                     
+# 按时间顺序排列
+orderWeb$V1 <- as.POSIXct(orderWeb$V1, format = "%Y-%m-%d %H:%M:%S")
+orderSocial$V1 <- as.POSIXct(orderSocial$V1, format = "%Y-%m-%d %H:%M:%S")
+orderWeb <- orderWeb[order(orderWeb$V1), ]
+orderSocial <- orderSocial[order(orderSocial$V1), ]
 
 # 重命名标题栏
 colnames(orderWeb) <- c('询盘时间', '国家', '公司名称', '联系人', '联系方式', '邮箱', '询盘内容', '跟进人')
 colnames(orderSocial) <- c('询盘时间', '国家', '公司名称', '联系人', '联系方式', '邮箱', '询盘内容', '跟进人')
 
-save(orderWeb, orderSocial, file = "data.RData")
+# 确保数据是数据框
+orderWeb <- as.data.frame(orderWeb)
+orderSocial <- as.data.frame(orderSocial)
+
+
