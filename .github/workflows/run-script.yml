@@ -36,6 +36,6 @@ jobs:
       - name: Run R script
         run: Rscript GetFile.R
         env:
-          LIFISHER_CODE: ${{ secrets.LIFISHER_CODE }}
+          LIFISHER_CODE: ${{ secrets.LIFISHER_CODES }}
           LIFISHER_TOKEN: ${{ secrets.LIFISHER_TOKEN }}
           LIFISHER_VARIABLES: ${{ vars.LIFISHER_VARIABLES }}
