@@ -1,40 +1,28 @@
-libraries:
-  - httr
-  - jsonlite
-  - dplyr
-  - tidyr
+name: Run R Script
 
-constants:
-  login_url: "https://admin.lifisher.com/api/login"
-  username: "15077219088"
-  password: "15077219088"
-  base_url: "https://api-qqt.weyescloud.com/jmc/inquiry/export"
-  site_id: 5735
-  page_size: 200
-  max_pages: 100
+on:
+  push:
+    branches:
+      - main  # 触发工作流的分支
+  pull_request:
+    branches:
+      - main
 
-headers:
-  User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-  appkey: "man2oqlx6oqnf2wzhhrbarih2zlmoe7ckb00aec53knzelpw8ogc4g8ws880o00b"
-  token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjb2QiOiI0MDYzLTg4NDc1Ni05Mzk3ODUtMTAzNjczOS0yMzY3NTciLCJ1c3IiOiIxNTA3NzIxOTA4OCIsImV4cCI6MTc0MzY2ODAzNSwiaWF0IjoxNzQyNDU4NDM1LCJqdGkiOiIwOWRmNGMycGx0OG44MDFxNHZzN2lnc2VrdSJ9.FcBKm5wDBL5ZP6_R15U9t2wxZBvj4gyNa48zXTk77Ig"
-  domain: "statistics.lifisher.com"
-  Referer: "https://statistics.lifisher.com/"
-  timestamp: "{{ as.character(as.numeric(Sys.time()) * 1000) }}"
+jobs:
+  run-r:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-data_processing:
-  remove_empty:
-    cols: "cols"
-    rows: "rows"
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.3.1'  # 指定 R 版本
 
-data_sources:
-  gsaData: "source == '4'"
-  orgData: "source == '7'"
-  fbTrans: "source == '20'"
-  fbData: "source == '12'"
+      - name: Install dependencies
+        run: |
+          install.packages(c("httr", "jsonlite", "dplyr", "tidyr"), repos = "https://cloud.r-project.org")
 
-output:
-  files:
-    - name: "data.RData"
-      objects:
-        - orderWeb
-        - orderSocial
+      - name: Run R script
+        run: Rscript your_script.R  # 替换为你的 R 脚本文件名
